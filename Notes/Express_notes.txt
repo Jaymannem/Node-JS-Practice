@@ -1,0 +1,1069 @@
+Express.js is a fast, minimal, and flexible web application framework 
+for Node.js.
+
+It simplifies building web servers and APIs by providing a set of tools 
+and features for handling HTTP requests, 
+routing, 
+middleware,
+Easy integration with templates and databases,
+Simplified request/response handling
+
+We will install express by using below command: 
+    npm install express
+
+
+Advantages of Express JS:
+==========================
+1. Express provides an easy way for creating servers and handling 
+requests and responses.
+
+2. Express offers a simple and flexible routing system.
+
+3. Middleware Support:
+        Logging 
+        Authentication 
+        Error handling 
+        Parsing JSON 
+
+4. Fast and Lightweight
+
+5. Perfect for building RESTful services.
+
+6. Handles JSON easily with express.json()
+
+7. Easy to integrate with databases (MongoDB, MySQL).
+
+8. Cross-Platform and Open Source
+
+
+Disadvantages of Express:
+==========================
+1. Limited Built-in Features
+
+2. Callback-Based Middleware
+
+3. it’s not the option for high-performance apps.
+
+4. Developers must manually handle:
+        Input Validation 
+        CSRF Protection 
+        Rate Limiting 
+
+5. Maintenance Overhead
+
+
+***********************************************************************************
+
+Key features of Express JS:
+=============================
+1. Fast and Lightweight 
+
+2. Routing 
+
+3. Middleware Support
+
+4. Built-in HTTP Utility Methods
+
+5. Template Engine Integration
+
+6. Serve Static Files
+
+7. REST API Support
+
+8. Error Handling
+
+9. Large Ecosystem
+
+
+Limitations of Express JS:
+===========================
+1. Developers must decide folder structure, middleware usage, etc.
+
+2. Limited Built-in Features:
+        ORM for databases
+        Authentication system
+        Advanced security features
+
+3. Middleware chaining can become hard to manage in large apps.
+
+4. Express does not enforce strong security by default.
+
+5. Maintenance Overhead
+
+***********************************************************************************
+
+Example:
+=========
+const express = require("express");
+
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("Welcome to Express JS Tutorial")
+});
+
+const PORT = 3000;
+
+app.listen(PORT, () => {
+    console.log("Server is running at port: " + PORT)
+})
+
+
+************************************************************************************
+
+Routes
+=======
+routes define how our application responds to client requests for specific 
+URLs and HTTP methods. 
+
+A route is a combination of:
+    HTTP Methods
+    Path 
+    Callback function (handles the req and res);
+
+
+courses.json:
+-------------
+{
+  "courses": [
+    { "id": 1, "name": "Node.js Basics" },
+    { "id": 2, "name": "Express.js Advanced" },
+    { "id": 3, "name": "JavaScript Fundamentals" }
+  ]
+}
+
+
+routes.js:
+-----------
+const express = require("express");
+const data = require("./courses.json");
+
+const app = express();
+const PORT = 3000;
+
+// get home page
+app.get("/", (req, res) => {
+  res.send("Home Page");
+});
+
+// get all courses
+app.get("/courses", (req, res) => {
+  res.json(data);
+});
+
+// get specific course
+app.get("/courses/:id", (req, res) => {
+  const courseId = parseInt(req.params.id);
+  const getSinglecourse = data.courses.find((course) => course.id === courseId);
+
+  if (getSinglecourse) {
+    res.json(getSinglecourse);
+  } else {
+    res.status(404).send("Course is not found! please try with other id");
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running at PORT: ${PORT}`);
+});
+
+***********************************************************************************
+
+Middlewares in Express JS:
+===========================
+Middleware in Express.js is a function that runs between the request and 
+the response cycle.
+
+It can: 
+  Access request and response objects.
+  Modify them 
+  End the request-response cycle
+  Pass control to the next middleware using next().
+
+Syntax:
+========
+app.use((req, res, next) => {
+    console.log('Middleware executed');
+    next(); // Pass control to next middleware or route
+});
+
+
+Advantages of Middlewares:
+===========================
+1. Code Reusability - Common logic (e.g., authentication, logging) can be 
+reused across routes.
+
+2. Modularity – Break down app logic into smaller
+
+3. Request Preprocessing – Parse JSON, validate data, handle sessions 
+before reaching routes.
+
+4. Error Handling – Centralized error handling using error middleware.
+
+5. Third-Party Integration – Easily integrate libraries like body-parser, 
+cors, morgan.
+
+
+Types of Middlewares in Express:
+=================================
+  1. Application-level Middleware
+  2. Router-level Middleware
+  3. Built-in Middleware
+  4. Third-party Middleware
+  5. Error-handling Middleware
+
+
+1. Application-level Middleware:
+===================================
+Bind application-level middleware to an instance of the app object by 
+using app.use() and app.method()
+
+app-middleware.js:
+------------------
+const express = require("express");
+const app = express();
+
+const appLevelMiddleWare = (req, res, next)=> {
+    console.log("This middleware will run on every request");
+
+    next();
+};
+
+app.use(appLevelMiddleWare);
+
+app.get("/", (req, res)=> {
+    res.send('Home Page')
+});
+
+app.get("/about", (req, res)=> {
+    res.send('About Page')
+});
+
+app.listen(3000, ()=> {
+    console.log("Server is running successfully!")
+});
+
+
+What next() Does:
+===================
+next() passes control to the next middleware or route handler in 
+the stack.
+
+Without next(), the request stops at the current middleware.
+
+
+When next() is Mandatory:
+==========================
+If we have multiple middlewares then next() is mandatory. Without next(), 
+the second middleware never runs.
+
+If you want to pass control to route handlers after middleware then next() 
+is mandatory.
+
+
+When We Don’t Need next():
+=============================
+If the middleware ends the request-response cycle by sending a response
+then next() is not required.
+
+
+timeStamp-middleware.js:
+--------------------------
+const timeStampLogger = (req, res, next) => {
+    const timeStamp = new Date().toISOString();
+
+    console.log(`${timeStamp} from ${req.method} to ${req.url}`)
+    next();
+}
+
+
+
+***********************************************************************************
+
+EJS Template Engine:
+=====================
+
+EJS - Embedded JavaScript templating.
+
+EJS is a popular template engine for Express.js that allows us to generate 
+dynamic HTML pages using JavaScript.
+
+Instead of sending plain text or JSON, we can render HTML views with 
+dynamic data.
+
+
+Why Use EJS?
+=============
+Helps separate presentation logic (HTML) from business logic (JavaScript).
+
+Makes it easy to create dynamic web pages.
+
+Allows embedding JavaScript code inside HTML using <%= %> or <% %> tags.
+
+
+npm install ejs
+
+
+
+***********************************************************************************
+
+Rest API Development:
+=====================
+
+const express = require("express");
+const app = express();
+
+// middleware
+app.use(express.json());
+
+const books = [
+  {
+    id: 1,
+    title: "Book 1",
+  },
+  {
+    id: 2,
+    title: "Book 2",
+  },
+];
+
+// intro route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Welcome to our book store api",
+  });
+});
+
+// get all books
+app.get("/get", (req, res) => {
+  res.json(books);
+});
+
+// get a single book
+app.get("/get/:id", (req, res) => {
+  const book = books.find((item) => item.id === Number(req.params.id));
+  if (book) {
+    res.status(200).json(book);
+  } else {
+    res.status(404).json({
+      message: "Book not found! Please try with a different id",
+    });
+  }
+});
+
+// add a new book
+app.post("/add", (req, res) => {
+  const newBook = {
+    id: books.length + 1,
+    title: `Book ${books.length + 1}`,
+  };
+
+  books.push(newBook);
+
+  res.status(201).json({
+    data: newBook,
+    message: "New book is added successfully!",
+  });
+});
+
+// update a book
+app.put("/update/:id", (req, res) => {
+  const currentBook = books.find(
+    (bookItem) => bookItem.id === Number(req.params.id)
+  );
+
+  if (currentBook) {
+    currentBook.title = req.body.title || currentBook.title;
+
+    res.status(200).json({
+      message: `Book with ID ${Number(req.params.id)} updated successfully!`,
+    });
+  } else {
+    res.status(404).json({
+      message: "Book not found",
+    });
+  }
+});
+
+// delete a book
+app.delete("/delete/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const findBookIndex = books.findIndex((item) => item.id === id);
+
+  if (findBookIndex !== -1) {
+    const deletedBook = books.splice(findBookIndex, 1);
+    res.status(200).json({
+      message: "Book deleted successfully!",
+      data: deletedBook[0],
+    });
+  } else {
+    res.status(404).json({
+      message: "Book not found",
+    });
+  }
+});
+
+const PORT = 3000;
+
+app.listen(PORT, () => {
+  console.log("Server is running");
+});
+
+***********************************************************************************
+Authentication and authorization:
+==================================
+
+controllers
+  auth-controller.js
+database 
+  db.js 
+middleware
+  admin-middleware.js 
+  auth-middleware.js
+models 
+  user.js
+routes 
+  admin-routes.js 
+  auth-routes.js 
+  home-routes.js 
+server.js 
+.env
+
+.env:
+------
+PORT = 3000
+MONGODB_URI = mongodb+srv://jaymannem21:jaymannem21@cluster0.xyrs4lw.mongodb.net/
+JWT_TOKEN_SECRET = JWT_TOKEN_SECRET
+
+
+server.js:
+-----------
+require("dotenv").config();
+
+const express = require("express");
+const connectDB = require("./database/db");
+const authRoutes = require("./routes/auth-routes")
+const homeRoutes = require("./routes/home-routes")
+const adminRoutes = require("./routes/admin-routes")
+
+const PORT = process.env.PORT || 3000;
+const app = express();
+
+connectDB();
+
+// middlewares
+app.use(express.json())
+app.use("/api/auth", authRoutes);
+app.use("/api/home", homeRoutes);
+app.use("/api/admin", adminRoutes);
+
+
+app.listen(PORT, ()=> {
+    console.log(`Server is running on PORT: ${PORT}`)
+})
+
+models/user.js
+---------------
+const mongoose = require("mongoose");
+
+const UserSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("User", UserSchema);
+
+schema: 
+========
+A schema describes the shape of the data like 
+Fields and types (e.g., name: String, age: Number)
+
+Defaults, required fields, enums, indexes, Validation rules
+
+In Node.js apps, Mongoose’s Schema defines our data structure 
+and validation logic in code.
+
+
+model:
+=====
+Model provides a programmatic interface for interacting with the 
+corresponding MongoDB collection.
+
+
+auth-controller.js:
+---------------------
+const UserAuth = require("../models/user");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+// registration controller
+async function registerUser(req, res) {
+  try {
+    // extract user information from req body
+    const { username, email, password, role } = req.body;
+
+    // check if the user is already exist in our db
+    const userExisting = await UserAuth.findOne({
+      $or: [{ username }, { email }],
+    });
+
+    if (userExisting) {
+      res.status(400).json({
+        success: false,
+        message:
+          "User is already exists, please try with a different username or email",
+      });
+    }
+
+    // hash user password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // create a new user and save in database
+    const createUser = new UserAuth({
+      username,
+      email,
+      password: hashedPassword,
+      role: role || "user",
+    });
+
+    await createUser.save();
+
+    if (createUser) {
+      res.status(200).json({
+        success: true,
+        message: "User is registered successfully!",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Unable to register the user, please try again.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again.",
+    });
+  }
+}
+
+// login controller
+async function loginUser(req, res) {
+  try {
+    const { username, password } = req.body;
+    // check user is registered in db or not.
+    const user = await UserAuth.findOne({ username });
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid Credentials",
+      });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid Credentials",
+      });
+    }
+
+    // create a user token
+    const accessToken = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+        role: user.role,
+      },
+      process.env.JWT_TOKEN_SECRET,
+      { expiresIn: "30m" }
+    );
+
+    res.status(200).json({
+      success: true, 
+      message: "Logged in successful!",
+      accessToken
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again.",
+    });
+  }
+}
+
+module.exports = {
+  registerUser,
+  loginUser,
+};
+
+
+
+db.js:
+-------
+const mongoose = require("mongoose");
+
+const connectDB = async ()=> {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log("Mongodb connected successfully")
+    } catch(error) {
+        console.log("Error in mongodb connection", error)
+    }
+}
+
+module.exports = connectDB
+
+
+
+admin-middleware.js:
+----------------------
+const isAdminUser = (req, res, next)=> {
+    if(req.userInfo.role !== "admin") {
+        res.status(403).json({
+            success: false, 
+            message: "Access denined! Admin rights required"
+        })
+    }
+    next();
+}
+
+module.exports = isAdminUser
+
+
+auth-middleware.js:
+---------------------
+const jwt = require("jsonwebtoken");
+
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  console.log(token);
+
+  if (!token) {
+    res.status(401).json({
+      success: false,
+      message: "Access denied, Please login to continue.",
+    });
+  }
+
+  // decode the token to get user info
+  try {
+    const decodeTokenInfo = jwt.verify(token, process.env.JWT_TOKEN_SECRET);
+    console.log(decodeTokenInfo)
+    req.userInfo = decodeTokenInfo;
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Token has expired, Please login to continue.",
+    });
+  }
+
+  next();
+};
+
+module.exports = authMiddleware;
+
+
+
+admin-routes.js:
+-----------------
+const express = require("express");
+const authMiddleware = require("../middleware/auth-middleware");
+const adminMiddleware = require("../middleware/admin-middleware")
+
+const router = express.Router();
+
+router.get("/welcome", authMiddleware, adminMiddleware, (req, res)=> {
+    res.json({
+        message: 'Welcome to admin page'
+    })
+})
+
+module.exports = router;
+
+
+auth-routes.js:
+-----------------
+const express = require("express");
+const { registerUser, loginUser } = require("../controllers/auth-controller");
+
+
+const router = express.Router();
+
+router.post("/register", registerUser); 
+router.post("/login", loginUser); 
+
+
+module.exports = router; 
+
+
+home-routes.js:
+-----------------
+const express = require("express");
+const authMiddleware = require("../middleware/auth-middleware")
+
+const router = express.Router();
+
+router.get("/welcome", authMiddleware, (req, res)=> {
+    const { username, userId, role} = req.userInfo;
+    res.json({
+        message: "Welcome to home page",
+        user: {
+            _id: userId,
+            username, 
+            role
+        }
+    })
+})
+
+module.exports = router;
+
+
+
+
+File Upload:
+=============
+Multer is a Node.js middleware for handling multipart/form-data, 
+which is primarily used for uploading files (like images, PDFs, etc.) 
+from the client to the server.
+
+npm install multer 
+
+Express doesn’t natively handle file uploads.
+
+Multer parses incoming form data and makes uploaded files accessible 
+via req.file or req.files.
+
+Supports single or multiple file uploads.
+
+DiskStorage: Save files locally on our server.
+
+MemoryStorage: Keep files in memory (useful for sending directly 
+to cloud services).
+
+
+
+Cloudinary:
+============
+Cloudinary is a cloud-based media management service that stores, 
+optimizes, and delivers images and videos.
+
+It provides APIs for uploading files and transforming them on the fly.
+
+Provides CDN for fast delivery.
+
+Secure and scalable.
+
+Built-in image/video transformations (resize, crop, compress, 
+watermark, etc.).
+
+Upload files directly from client or server.
+
+Apply transformations via URL (e.g., resize, format change).
+
+Handles optimization for web performance.
+
+npm i cloudinary
+
+
+
+How Multer and cloudinary work together:
+==========================================
+
+Multer handles the upload from client to server.
+
+Cloudinary stores the files in the cloud.
+
+Use Multer with MemoryStorage to avoid saving locally.
+
+Pass the file buffer to Cloudinary for upload.
+
+Get back a secure URL from Cloudinary and store it in database.
+
+
+Example:
+=========
+
+config 
+  cloudinary.js
+controllers 
+  image-controller.js 
+helpers 
+  cloudinary-helper.js
+middleware 
+  upload-middleware.js 
+models
+  image.js 
+routes  
+  image-routes.js
+uploads 
+
+server.js:
+----------
+require("dotenv").config();
+
+const express = require("express");
+const connectDB = require("./database/db");
+const authRoutes = require("./routes/auth-routes")
+const homeRoutes = require("./routes/home-routes")
+const adminRoutes = require("./routes/admin-routes");
+const imageRoutes = require("./routes/image-routes")
+
+const PORT = process.env.PORT || 3000;
+const app = express();
+
+connectDB();
+
+// middlewares
+app.use(express.json())
+app.use("/api/auth", authRoutes);
+app.use("/api/home", homeRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/image", imageRoutes);
+
+
+app.listen(PORT, ()=> {
+    console.log(`Server is running on PORT: ${PORT}`)
+});
+
+
+cloudinary.js:
+---------------
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+module.exports = cloudinary;
+
+
+image-controller.js:
+---------------------
+const Image = require("../models/image");
+const uploadToCloudinary = require("../helpers/cloudinary-helper");
+const fs = require("fs")
+
+const uploadImageController = async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      res.status(400).json({
+        success: false,
+        message: "File is required, please upload an image.",
+      });
+    }
+
+    // upload to cloudinary
+    const { url, publicId } = await uploadToCloudinary(file.path);
+
+    // store the image url and public_id
+    const createImage = new Image({
+      url,
+      publicId,
+      uploadedBy: req.userInfo.userId,
+    });
+
+    await createImage.save();
+
+    // delete the image from local 
+    fs.unlinkSync(req.file.path)
+
+    res.status(201).json({
+        success: true, 
+        message: "Image uploaded successfully!",
+        image: createImage
+    })
+
+  } catch (error) {
+    console.log("Error in upload image", error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong!, Please try again.",
+    });
+  }
+};
+
+async function fetchImagesController(req, res) {
+  try {
+    const images = await Image.find({});
+    if(!images) {
+      res.status(400).json({
+        success: false, 
+        message: "Unable to fetch the images"
+      })
+    }
+
+    res.status(200).json({
+      success: true, 
+      message: "Images fetched successfully!",
+      data: images
+    })
+  } catch(error) {
+    console.log(error);
+    res.status(500).json({
+      success: false, 
+      message: "Something went wrong! Please try again"
+    })
+  }
+}
+
+module.exports = { uploadImageController, fetchImagesController };
+
+
+
+cloudinary-helper.js:
+----------------------
+const cloudinary = require("../config/cloudinary");
+
+const uploadToCloudinary = async (filePath) => {
+    try {
+        const result = await cloudinary.uploader.upload(filePath);
+        console.log('result', result);
+        return {
+            url: result.secure_url,
+            publicId: result.public_id
+        }
+    } catch(error) {
+        console.error('Error while uploading to cloudinary', error);
+        throw new Error('Error while uploading to cloudinary')
+    }
+}
+
+module.exports = uploadToCloudinary;
+
+
+upload-middleware.js:
+-----------------------
+const multer = require("multer");
+const path = require("path");
+
+// set our multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const checkFileFilter = (req, file, cb)=> {
+  if(file.mimetype.startsWith("image")) {
+    cb(null, true)
+  } else {
+    cb(new Error("Please upload images only!"))
+  }
+};
+
+module.exports = multer({
+  storage: storage,
+  fileFilter: checkFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5 MB
+  }
+})
+
+
+image.js:
+---------
+const mongoose = require("mongoose");
+
+const ImageSchema = new mongoose.Schema({
+  url: {
+    type: String,
+    required: true,
+  },
+  publicId: {
+    type: String,
+    required: true,
+  },
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
+}, {timestamps: true});
+
+module.exports = mongoose.model("Image", ImageSchema);
+
+
+image-routes.js:
+-----------------
+const express = require("express");
+const authMiddleware = require("../middleware/auth-middleware");
+const adminMiddleware = require("../middleware/admin-middleware");
+const uploadMiddleware = require("../middleware/upload-middleware");
+const {
+  uploadImageController,
+  fetchImagesController,
+} = require("../controllers/image-controller");
+
+const router = express.Router();
+
+// Upload image
+router.post(
+  "/upload",
+  authMiddleware,
+  adminMiddleware,
+  uploadMiddleware.single("image"),
+  uploadImageController
+);
+
+// Get all the images
+router.get("/get", authMiddleware, fetchImagesController);
+
+module.exports = router;
+
+***********************************************************************************
+
+Change password, Delete image functionality, sorting and pagination:
+=======================================================================
+
+
+
+
+
+
+
+
+
+***********************************************************************************
+
