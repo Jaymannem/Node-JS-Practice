@@ -392,7 +392,7 @@ index.js:
 ---------
 const path = require('path');
 
-// get directory name 
+// get directory name (absolute path will get) 
 console.log('Directory name: ', path.dirname(__filename))
 // C:\Users\v-jayamannem\Desktop\TechStack\Node JS\4.path-module
 
@@ -415,6 +415,14 @@ users\documents\node\projects
 // Normalize a path
 const normalizePath = path.normalize("/user/.documents/../node/projects");
 console.log("Normalize Path", normalizePath) // \user\node\projects
+
+
+4.path-module --> this is a directory name.
+
+path.basename(__filename) will always return the name of the 
+currently executing file, not all files in the folder.
+
+
 
 _______________________________________________________________________________
 
@@ -1059,7 +1067,7 @@ const EventEmitter = require("events")
 
 class FileUploader extends EventEmitter {
   upload(file) {
-    console.log(`Starting upload for ${file}...`);
+    console.log(`Starting upload ${file}...`);
 
     let progress = 0; 
 
