@@ -277,6 +277,73 @@ const timeStampLogger = (req, res, next) => {
 }
 
 
+app-level-middleware.js:
+-------------------------
+const express = require("express");
+
+const app = express();
+const PORT = 3000;
+
+const appLevelMiddleware = (req, res, next) => {
+    console.log(`${req.method} request to ${req.url} at ${new Date().getFullYear()}`)
+    next();
+};
+
+app.use(appLevelMiddleware)
+
+app.get("/home", (req, res)=> {
+    res.send("Welcome to Express js");
+})
+
+app.get("/home", (req, res)=> {
+    res.send("About Page");
+})
+
+app.listen(PORT, ()=> {
+    console.log(`Server is running on PORT, ${PORT}`)
+})
+
+
+
+route-level-middleware.js:
+--------------------------
+const express = require("express");
+
+const app = express();
+const PORT = 3000;
+
+const authMiddleware = (req, res, next) => {
+    console.log("Authentication check running")
+    let isAuth = true; 
+
+    if(isAuth) {
+        next();
+    } else {
+        res.status(401).send("Not allowed to access this page")
+    }
+}
+
+app.get("/dashboard", authMiddleware, (req, res)=> {
+    res.send("Welcome to Dashboard Page")
+});
+
+app.get("/", (req, res)=> {
+    res.send("Home Page")
+});
+
+app.listen(PORT, () => {
+    console.log("Server is running on PORT: ", PORT)
+})
+
+
+thirdparty-middleware.js:
+--------------------------
+cors 
+morgan 
+helmet 
+
+
+
 
 ***********************************************************************************
 
@@ -303,6 +370,65 @@ Allows embedding JavaScript code inside HTML using <%= %> or <% %> tags.
 
 npm install ejs
 
+
+index.js:
+---------
+const express = require("express");
+const path = require("path");
+const { title } = require("process");
+
+const app = express();
+const PORT = 3000;
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+const products = [
+  { id: 1, name: "product 1" },
+  { id: 2, name: "product 2" },
+  { id: 3, name: "product 3" },
+];
+
+app.get("/products", (req, res) => {
+  res.render("home", { title: "Home", products: products });
+});
+
+app.get("/about", (req, res)=> {
+  res.render("about", {title: "About page"})
+})
+
+app.listen(PORT, () => {
+  console.log("Server is running on PORT:", PORT);
+});
+
+
+home.ejs:
+----------
+<%- include("components/header.ejs") %>
+
+<h1>Welcome to Home Page</h1>
+<label>List of products:</label>
+
+<ul>
+    <% products.forEach(product =>{ %>
+        <li><%= product.name %></li>
+    <% }) %>
+</ul>
+
+<%- include("components/footer.ejs") %>
+
+
+
+about.ejs:
+----------
+<%- include("components/header.ejs") %>
+
+<h1>This is about page</h1>
+
+<%- include("components/footer.ejs") %>
+
+
+create home.ejs and about.ejs views
 
 
 ***********************************************************************************

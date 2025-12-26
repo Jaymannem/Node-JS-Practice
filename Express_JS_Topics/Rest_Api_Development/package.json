@@ -1,8 +1,8 @@
 {
-  "name": "express_js_topics",
+  "name": "rest_api_development",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,8 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ejs": "^3.1.10",
-    "express": "^5.2.1",
-    "morgan": "^1.10.1"
+    "express": "^5.2.1"
   }
 }
