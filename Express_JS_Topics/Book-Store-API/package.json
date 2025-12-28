@@ -1,20 +1,20 @@
 {
-  "name": "express_js_topics",
+  "name": "book-store-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.3",
-    "ejs": "^3.1.10",
     "express": "^5.2.1",
-    "mongoose": "^9.0.2",
-    "morgan": "^1.10.1"
+    "mongoose": "^9.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
