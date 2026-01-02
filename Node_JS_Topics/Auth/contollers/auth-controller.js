@@ -88,7 +88,6 @@ const loginUser = async (req, res) => {
       accessToken
     })
   } catch (error) {
-    console.log("Error: ", error);
     res.status(500).json({
       success: false,
       message: "Something went wrong! Please try again",

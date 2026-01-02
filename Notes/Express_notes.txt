@@ -566,27 +566,26 @@ JWT_TOKEN_SECRET = JWT_TOKEN_SECRET
 server.js:
 -----------
 require("dotenv").config();
-
 const express = require("express");
 const connectDB = require("./database/db");
-const authRoutes = require("./routes/auth-routes")
-const homeRoutes = require("./routes/home-routes")
+const authRoutes = require("./routes/auth-routes");
+const homeRoutes = require("./routes/home-routes");
 const adminRoutes = require("./routes/admin-routes")
+const uploadImageRoutes = require("./routes/upload-routes")
 
-const PORT = process.env.PORT || 3000;
 const app = express();
+const port = process.env.PORT || 3000;
 
 connectDB();
 
-// middlewares
-app.use(express.json())
+app.use(express.json());
 app.use("/api/auth", authRoutes);
-app.use("/api/home", homeRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/home", homeRoutes)
+app.use("/api/admin", adminRoutes)
+app.use("/api/image", uploadImageRoutes)
 
-
-app.listen(PORT, ()=> {
-    console.log(`Server is running on PORT: ${PORT}`)
+app.listen(port, () => {
+    console.log(`Server is running on PORT: ${port}`)
 })
 
 models/user.js
@@ -774,7 +773,7 @@ admin-middleware.js:
 ----------------------
 const isAdminUser = (req, res, next)=> {
     if(req.userInfo.role !== "admin") {
-        res.status(403).json({
+        return res.status(403).json({
             success: false, 
             message: "Access denined! Admin rights required"
         })
@@ -902,10 +901,10 @@ to cloud services).
 
 Cloudinary:
 ============
-Cloudinary is a cloud-based media management service that stores, 
+Cloudinary is a cloud-based service that stores, 
 optimizes, and delivers images and videos.
 
-It provides APIs for uploading files and transforming them on the fly.
+It provides APIs for uploading files and transforming them.
 
 Provides CDN for fast delivery.
 
@@ -944,239 +943,79 @@ Example:
 config 
   cloudinary.js
 controllers 
-  image-controller.js 
+  upload-controller.js 
 helpers 
   cloudinary-helper.js
 middleware 
   upload-middleware.js 
 models
-  image.js 
+  Image.js 
 routes  
-  image-routes.js
+  upload-routes.js
 uploads 
 
-server.js:
+
+Image.js:
 ----------
-require("dotenv").config();
+const mongoose = require("mongoose");
 
-const express = require("express");
-const connectDB = require("./database/db");
-const authRoutes = require("./routes/auth-routes")
-const homeRoutes = require("./routes/home-routes")
-const adminRoutes = require("./routes/admin-routes");
-const imageRoutes = require("./routes/image-routes")
+const imageSchema = new mongoose.Schema({
+  url: {
+    type: String,
+    required: true,
+  },
 
-const PORT = process.env.PORT || 3000;
-const app = express();
+  publicId: {
+    type: String,
+    required: true,
+  },
 
-connectDB();
-
-// middlewares
-app.use(express.json())
-app.use("/api/auth", authRoutes);
-app.use("/api/home", homeRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/image", imageRoutes);
-
-
-app.listen(PORT, ()=> {
-    console.log(`Server is running on PORT: ${PORT}`)
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
+
+const Image = mongoose.model("Image", imageSchema);
+module.exports = Image;
+
 
 
 cloudinary.js:
 ---------------
+require("dotenv").config();
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 module.exports = cloudinary;
 
 
-image-controller.js:
+cloudinaryHelper.js:
 ---------------------
-const Image = require("../models/image");
-const uploadToCloudinary = require("../helpers/cloudinary-helper");
-const fs = require("fs")
-
-const uploadImageController = async (req, res) => {
-  try {
-    const file = req.file;
-
-    if (!file) {
-      res.status(400).json({
-        success: false,
-        message: "File is required, please upload an image.",
-      });
-    }
-
-    // upload to cloudinary
-    const { url, publicId } = await uploadToCloudinary(file.path);
-
-    // store the image url and public_id
-    const createImage = new Image({
-      url,
-      publicId,
-      uploadedBy: req.userInfo.userId,
-    });
-
-    await createImage.save();
-
-    // delete the image from local 
-    fs.unlinkSync(req.file.path)
-
-    res.status(201).json({
-        success: true, 
-        message: "Image uploaded successfully!",
-        image: createImage
-    })
-
-  } catch (error) {
-    console.log("Error in upload image", error);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong!, Please try again.",
-    });
-  }
-};
-
-async function fetchImagesController(req, res) {
-  try {
-    const images = await Image.find({});
-    if(!images) {
-      res.status(400).json({
-        success: false, 
-        message: "Unable to fetch the images"
-      })
-    }
-
-    res.status(200).json({
-      success: true, 
-      message: "Images fetched successfully!",
-      data: images
-    })
-  } catch(error) {
-    console.log(error);
-    res.status(500).json({
-      success: false, 
-      message: "Something went wrong! Please try again"
-    })
-  }
-}
-
-module.exports = { uploadImageController, fetchImagesController };
-
-
-
-cloudinary-helper.js:
-----------------------
-const cloudinary = require("../config/cloudinary");
+const cloudinary = require("../config/cloudinary")
 
 const uploadToCloudinary = async (filePath) => {
-    try {
-        const result = await cloudinary.uploader.upload(filePath);
-        console.log('result', result);
-        return {
-            url: result.secure_url,
-            publicId: result.public_id
-        }
-    } catch(error) {
-        console.error('Error while uploading to cloudinary', error);
-        throw new Error('Error while uploading to cloudinary')
+  try {
+    const result = await cloudinary.uploader.upload(filePath);
+    return {
+        url: result.secure_url, 
+        publicId: result.public_id
     }
-}
+  } catch (error) {
+    console.error("Error while uploading to cloudinary", error);
+    throw new Error("Error while uploading to cloudinary");
+  }
+};
 
 module.exports = uploadToCloudinary;
 
 
-upload-middleware.js:
------------------------
-const multer = require("multer");
-const path = require("path");
-
-// set our multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(
-      null,
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    );
-  },
-});
-
-const checkFileFilter = (req, file, cb)=> {
-  if(file.mimetype.startsWith("image")) {
-    cb(null, true)
-  } else {
-    cb(new Error("Please upload images only!"))
-  }
-};
-
-module.exports = multer({
-  storage: storage,
-  fileFilter: checkFileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5 MB
-  }
-})
-
-
-image.js:
----------
-const mongoose = require("mongoose");
-
-const ImageSchema = new mongoose.Schema({
-  url: {
-    type: String,
-    required: true,
-  },
-  publicId: {
-    type: String,
-    required: true,
-  },
-  uploadedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
-}, {timestamps: true});
-
-module.exports = mongoose.model("Image", ImageSchema);
-
-
-image-routes.js:
------------------
-const express = require("express");
-const authMiddleware = require("../middleware/auth-middleware");
-const adminMiddleware = require("../middleware/admin-middleware");
-const uploadMiddleware = require("../middleware/upload-middleware");
-const {
-  uploadImageController,
-  fetchImagesController,
-} = require("../controllers/image-controller");
-
-const router = express.Router();
-
-// Upload image
-router.post(
-  "/upload",
-  authMiddleware,
-  adminMiddleware,
-  uploadMiddleware.single("image"),
-  uploadImageController
-);
-
-// Get all the images
-router.get("/get", authMiddleware, fetchImagesController);
-
-module.exports = router;
 
 ***********************************************************************************
 

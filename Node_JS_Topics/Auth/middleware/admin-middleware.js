@@ -2,7 +2,7 @@ const isAdminUser = (req, res, next) => {
     const user = req.userInfo;
 
     if(user.role !== "admin") {
-        res.status(403).json({
+        return res.status(403).json({
             success: false, 
             message: "Access denied. Admin rights required"
         })
